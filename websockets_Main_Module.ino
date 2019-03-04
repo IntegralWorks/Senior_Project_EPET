@@ -5,8 +5,8 @@
 #include <Hash.h>
  
 // Replace with your network credentials
-const char* ssid = "Not_your_library's_wifi";
-const char* password = "K33Per$0utW1ngDr0m3s";
+const char* ssid = "redacted";
+const char* password = "redacted";
  
 WebSocketsServer webSocket = WebSocketsServer(81);
 ESP8266WebServer server(80);   //instantiate server at port 80 (http port)
