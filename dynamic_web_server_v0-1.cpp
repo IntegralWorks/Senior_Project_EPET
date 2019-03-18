@@ -19,69 +19,35 @@ const char *password = "thereisnospoon";   // The password required to connect t
 const char *OTAName = "ESP8266";           // A name and a password for the OTA service
 const char *OTAPassword = "esp8266";
 
-String page = "";
-int trig = D0;
-int echo = D1;
-int gpio_0 = D2;
-int gpio_1 = D7;
+// String page = "";
+// int TRIG = D0;
+// int ECHO = D1;
+// int GPIO_0 = D2;
+// int GPIO_1 = D7;
+
+#define TRIG D0
+#define ECHO D1
+#define GPIO_0 D2
+#define GPIO_1 D7
+
+bool GPIO_0_status = false;
+bool GPIO_1_status = false;
+bool water_sensor_status = false;
+double water_container_0_level = 0;
+double water_container_1_level = 0;
 
 long hp = 0; //sorry for the messy global
-
-// void GPIO_setup(){
- 
-//  //make the LED pin output and initially turned off
-//  pinMode(gpio_0, OUTPUT);
-//  digitalWrite(gpio_0, LOW);
-//  pinMode(gpio_1, OUTPUT);
-//  digitalWrite(gpio_1, LOW);
- 
-//  delay(1000);
- 
-//  Serial.begin(115200);
- 
-//  server.on("/", [](){
-//     server.send(200, "text/html", page);
-//  });
- 
-//  server.on("/GPIO_0_ON", [](){
-//     server.send(200, "text/html", page);
-//     digitalWrite(gpio_0, HIGH);
-//     delay(1000);
-//  });
- 
-//  server.on("/GPIO_0_OFF", [](){
-//     server.send(200, "text/html", page);
-//     digitalWrite(gpio_0, LOW);
-//     delay(1000);
-//  });
-
-//  server.on("/GPIO_1_ON", [](){
-//     server.send(200, "text/html", page);
-//     digitalWrite(gpio_1, HIGH);
-//     delay(1000);
-//  });
- 
-//  server.on("/GPIO_1_OFF", [](){
-//     server.send(200, "text/html", page);
-//     digitalWrite(gpio_1, LOW);
-//     delay(1000);
-//  });
- 
-// }
 
 
 void sonic_sensor_setup(){
   Serial.begin(115200);
-  pinMode(trig, OUTPUT);
-  pinMode(echo, INPUT);
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
 
-  server.on("/WATER_LEVEL:", [](){
-    server.send(200, "text/html", page);
-    Serial.print(hp);
-    Serial.print("\n");
-
-    delay(1000);
- });
+  Serial.print(hp);
+  Serial.print("\n");
+  delay(1000);
+  
 }
 
 int sonic_sensor_loop(){
@@ -93,14 +59,14 @@ int sonic_sensor_loop(){
 
   
   // Transmitting pulse
-  digitalWrite(trig, LOW);
+  digitalWrite(TRIG, LOW);
   delayMicroseconds(2);
-  digitalWrite(trig, HIGH);
+  digitalWrite(TRIG, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trig, LOW);
+  digitalWrite(TRIG, LOW);
   
   // Waiting for pulse
-  t = pulseIn(echo, HIGH);
+  t = pulseIn(ECHO, HIGH);
   
   // Calculating distance 
   h = t / 58;
@@ -119,7 +85,7 @@ int sonic_sensor_loop(){
 const char* mdnsName = "esp8266"; // Domain name for the mDNS responder
 
 void setup() {
-	sonic_sensor_setup();
+  sonic_sensor_setup();
 
   // pinMode(LED_RED, OUTPUT);    // the pins with LEDs connected are outputs
   // pinMode(LED_GREEN, OUTPUT);
@@ -152,19 +118,11 @@ unsigned long prevMillis = millis();
 int hue = 0;
 
 void loop() {
-	sonic_sensor_loop();
+  sonic_sensor_loop();
   webSocket.loop();                           // constantly check for websocket events
   server.handleClient();                      // run the server
   ArduinoOTA.handle();                        // listen for OTA events
 
-  if(rainbow) {                               // if the rainbow effect is turned on
-    if(millis() > prevMillis + 32) {          
-      if(++hue == 360)                        // Cycle through the color wheel (increment by one degree every 32 ms)
-        hue = 0;
-      setHue(hue);                            // Set the RGB LED to the right color
-      prevMillis = millis();
-    }
-  }
 }
 
 
@@ -316,7 +274,7 @@ void handleFileUpload(){ // upload a new file to the SPIFFS
   }
 }
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) { // When a WebSocket message is received
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) { // When a WebSocket message is received
   switch (type) {
     case WStype_DISCONNECTED:             // if the websocket is disconnected
       Serial.printf("[%u] Disconnected!\n", num);
@@ -328,12 +286,45 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       }
       break;
     case WStype_TEXT:                     // if new text data is received
-      for(int i = 0; i < length; i++) Serial.print((char) payload[i]);
-   		Serial.println();
+      Serial.printf("[%u] get Text: %s\n", num, payload);
+
+      if (payload[0] == 'defineWaterLevel') {
+      }
+
+      if (payload[0] == 'getWaterLevel') {
+      }
+
+      if (payload[0] == 'toggleGPIO_0_off') {
+      
+        bool gpio0status = false;
+        digitalWrite(GPIO_0, LOW);
+        
+      }
+
+      if (payload[0] == 'toggleGPIO_0_on') {
+      
+        bool gpio0status = true;
+        digitalWrite(GPIO_0, HIGH);
+
+      }
+
+      if (payload[0] == 'toggleGPIO_1_off') {
+      
+        bool gpio1status = false;
+        digitalWrite(GPIO_1, LOW);
+
+      }
+
+      if (payload[0] == 'toggleGPIO_1_on') {
+      
+        bool gpio1status = true;
+        digitalWrite(GPIO_1, HIGH);
+
+      }
+
       break;
   }
 }
-
 
 String formatBytes(size_t bytes) { // convert sizes in bytes to KB and MB
   if (bytes < 1024) {
@@ -353,4 +344,3 @@ String getContentType(String filename) { // determine the filetype of a given fi
   else if (filename.endsWith(".gz")) return "application/x-gzip";
   return "text/plain";
 }
-
