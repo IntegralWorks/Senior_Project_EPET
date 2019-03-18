@@ -1,0 +1,58 @@
+3/18/2019
+
+.........
+
+Station connected to ESP8266 AP
+
+OTA ready
+
+SPIFFS started. Contents:
+	FS File: /apple-touch-icon-180x180.png, size: 16.85KB
+	FS File: /edit.html.gz, size: 620B
+	FS File: /favicon-144x144.png, size: 13.53KB
+	FS File: /favicon.ico.gz, size: 6.96KB
+	FS File: /index.html.gz, size: 828B
+	FS File: /main.css.gz, size: 556B
+	FS File: /manifest.json, size: 154B
+	FS File: /success.html.gz, size: 413B
+	FS File: /WebSocket.js.gz, size: 522B
+
+WebSocket server started.
+mDNS responder started: http://esp8266.local
+HTTP server started.
+handleFileRead: /
+	Sent file: /index.html.gz
+handleFileRead: /main.css
+	Sent file: /main.css.gz
+handleFileRead: /WebSocket.js
+	Sent file: /WebSocket.js.gz
+handleFileRead: /apple-touch-icon-180x180.png
+	Sent file: /apple-touch-icon-180x180.png
+handleFileRead: /favicon.ico
+	Sent file: /favicon.ico.gz
+handleFileRead: /%22toggleGPIO_0_on/%22
+	File Not Found: /%22toggleGPIO_0_on/%22
+handleFileRead: /%22toggleGPIO_1_on/%22
+	File Not Found: /%22toggleGPIO_1_on/%22
+[0] Connected from 192.168.4.2 url: /
+[0] Disconnected!
+handleFileRead: /%22WATER_LEVEL:/%22
+	File Not Found: /%22WATER_LEVEL:/%22
+handleFileRead: /%22toggleGPIO_0_on/%22
+	File Not Found: /%22toggleGPIO_0_on/%22
+[1] Connected from 192.168.4.2 url: /
+[1] Disconnected!
+[2] Connected from 192.168.4.2 url: /
+[2] Disconnected!
+[0] Connected from 192.168.4.2 url: /
+[0] Disconnected!
+[1] Connected from 192.168.4.2 url: /
+[1] get Text: Connect Mon Mar 18 2019 02:06:56 GMT-0500 (Central Daylight Time)
+[1] Disconnected!
+handleFileRead: /%22toggleGPIO_0_on/%22
+	File Not Found: /%22toggleGPIO_0_on/%22
+[0] Connected from 192.168.4.2 url: /
+[0] get Text: Connect Mon Mar 18 2019 02:08:03 GMT-0500 (Central Daylight Time)
+[0] Disconnected!
+handleFileRead: /%22toggleGPIO_0_on/%22
+	File Not Found: /%22toggleGPIO_0_on/%22
