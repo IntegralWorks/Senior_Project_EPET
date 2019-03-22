@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
+connection.onopen = function () {
+  connection.send('Connect ' + new Date());
+};
+
+connection.onerror = function (error) {
+  console.log('WebSocket Error ', error);
+};
+connection.onmessage = function (e) {
+  console.log('Server: ', e.data);
+};
+connection.onclose = function () {
+  console.log('WebSocket connection closed');
+};
+</script>
+
+<h3>DEFINE WATER LEVEL</h3>
+<p></p>
+Radius (in cm): <input type="number" id=radius step="any" min=".001" max="4294967295">
+<p></p>
+Height (in cm): <input type="number" id=height step="any" min=".001" max="4294967295">
+<button onclick="calculateVolume()">calculate volume</button>
+<p>Volume:</p> <p id="volStatus"></p>
+<br/>
+<script>
+    function calculateVolume() {
+        var r = document.getElementById("radius").value;
+        var h = document.getElementById("height").value;
+
+        const pi = 3.14;
+
+        document.getElementById("volStatus").innerHTML = pi*r*r*h;
+    }
+</script>
+
+<p>eazyCONSOLE.<br/>
+    Type commands in the eazyConsole or press the GPIO buttons.
+    eazyConsole: <input id=eazyConsoleInput>
+    </br>
+</p>
+
+<button onclick="eazyConsole()">Enter Command</button>
+<p>eazyConsole history:</p> <p id="eazyConsole"></p>
+<script>
+
+    var consoleHistory = [];
+    var currentCommand = document.getElementById("eazyConsoleInput").value;
+
+    document.getElementById("eazyConsole").innerHTML = currentCommand;
+    function eazyConsole() {
+        var consoleCommands = ["defineWaterLevel","getWaterLevel","toggleGPIO_0_on","toggleGPIO_0_off","toggleGPIO_1_on","toggleGPIO_1_off"];
+        // var consoleHistory = [];
+        //
+        var currentCommand = document.getElementById("eazyConsoleInput").value;
+        if (consoleCommands.includes(currentCommand)) {
+            switch (currentCommand) {
+                case consoleCommands[0]:
+                    //code for defining water level
+                    break;
+                case consoleCommands[1]:
+                    //code for retrieving water level
+                    break;
+                case consoleCommands[2]:
+                    GPIO_0_ON();
+                    //send string to Arduino!
+                    break;
+                case consoleCommands[3]:
+                    GPIO_0_OFF();
+                    break;
+                case consoleCommands[4]:
+                    GPIO_1_ON();
+                    break;
+                case consoleCommands[5]:
+                    GPIO_1_OFF();
+                    break;
+            }
+        } else {
+            document.getElementById("eazyConsole").innerHTML = "not a command friendo!";
+        }
+    }
+
+
+
+
+
+</script>
+
+<p>
+
+    Commands: <br/>
+    defineWaterLevel <br/>
+    getWaterLevel <br/>
+    toggleGPIO_0_on <br/>
+    toggleGPIO_0_off <br/>
+    toggleGPIO_1_on <br/>
+    toggleGPIO_1_off <br/>
+    getGPIOStatus <br/>
+</p>
+
+
+<button onclick="GPIO_0_ON()">GPIO_0_ON</button>
+<button onclick="GPIO_0_OFF()">GPIO_0_OFF</button>
+<button onclick="GPIO_1_ON()">GPIO_1_ON</button>
+<button onclick="GPIO_1_OFF()">GPIO_1_OFF</button>
+<br/>
+
+<p>GPIO_0_STATUS:</p> <p id="gpio0Status"></p>
+<br/>
+<p>GPIO_1_STATUS:</p> <p id="gpio1Status"></p>
+
+<script>
+    var gpio0Status = false;
+    var gpio1Status = false;
+
+
+    function GPIO_0_ON() {
+        document.getElementById("gpio0Status").innerHTML = "GPIO 0 is ON";
+        gpio0Status = true;
+    }
+    function GPIO_0_OFF() {
+        document.getElementById("gpio0Status").innerHTML = "GPIO 0 is OFF";
+        gpio0Status = false;
+    }
+    function GPIO_1_ON() {
+        document.getElementById("gpio1Status").innerHTML = "GPIO 1 is ON";
+        gpio1Status = true;
+    }
+    function GPIO_1_OFF() {
+        document.getElementById("gpio1Status").innerHTML = "GPIO 1 is OFF";
+        gpio1Status = false;
+    }
+
+</script>
+
+</body>
+</html>
