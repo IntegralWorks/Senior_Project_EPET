@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <body>
+
 <script>
 var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
 connection.onopen = function () {
@@ -17,6 +18,28 @@ connection.onclose = function () {
   console.log('WebSocket connection closed');
 };
 </script>
+
+<h3>GPIO TEST!!!!!</h3>
+<script>
+
+    function gpioTestON(){
+    var test = 'x';
+    console.log('TESTING GPIO, x IS ON!!: ' + test);
+    connection.send(test);
+}
+
+    function gpioTestOFF(){
+    var test = 'y';
+    console.log('TESTING GPIO, y IS OFF!!: ' + test);
+    connection.send(test);
+
+}
+
+</script>
+
+<button onclick="gpioTestON()">TEST ON!!!</button>
+<button onclick="gpioTestOFF()">TEST OFF!!!</button>
+
 
 <h3>DEFINE WATER LEVEL</h3>
 <p></p>
@@ -102,6 +125,7 @@ Height (in cm): <input type="number" id=height step="any" min=".001" max="429496
 </p>
 
 
+
 <button onclick="GPIO_0_ON()">GPIO_0_ON</button>
 <button onclick="GPIO_0_OFF()">GPIO_0_OFF</button>
 <button onclick="GPIO_1_ON()">GPIO_1_ON</button>
@@ -113,25 +137,41 @@ Height (in cm): <input type="number" id=height step="any" min=".001" max="429496
 <p>GPIO_1_STATUS:</p> <p id="gpio1Status"></p>
 
 <script>
-    var gpio0Status = false;
-    var gpio1Status = false;
-
-
+    
     function GPIO_0_ON() {
-        document.getElementById("gpio0Status").innerHTML = "GPIO 0 is ON";
-        gpio0Status = true;
+
+    document.getElementById("gpio0Status").innerHTML = "GPIO 0 is ON";
+    var gpstatus0 = 'toggleGPIO_0_on';
+    console.log('GPIO_0 off: ');
+    connection.send(test);
+        
     }
+
     function GPIO_0_OFF() {
-        document.getElementById("gpio0Status").innerHTML = "GPIO 0 is OFF";
-        gpio0Status = false;
+
+    document.getElementById("gpio0Status").innerHTML = "GPIO 0 is OFF";
+    var gpstatus0 = 'toggleGPIO_0_off';
+    console.log('GPIO_0 off: ');
+    connection.send(test);
+        
     }
+
     function GPIO_1_ON() {
-        document.getElementById("gpio1Status").innerHTML = "GPIO 1 is ON";
-        gpio1Status = true;
+
+    document.getElementById("gpio1Status").innerHTML = "GPIO 1 is ON";
+    var gpstatus1 = 'toggleGPIO_1_on';
+    console.log('GPIO_1 on: ');
+    connection.send(test);
+        
     }
+
     function GPIO_1_OFF() {
-        document.getElementById("gpio1Status").innerHTML = "GPIO 1 is OFF";
-        gpio1Status = false;
+
+    document.getElementById("gpio1Status").innerHTML = "GPIO 1 is OFF";
+    var gpstatus1 = 'toggleGPIO_1_off';
+    console.log('GPIO_1 off: ');
+    connection.send(test);
+        
     }
 
 </script>
