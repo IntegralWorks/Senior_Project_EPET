@@ -6,6 +6,8 @@
 #include <FS.h>
 #include <WebSocketsServer.h>
 
+//https://github.com/esp8266/arduino-esp8266fs-plugin/releases java thingy
+
 ESP8266WiFiMulti wifiMulti;       // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
 
 ESP8266WebServer server(80);       // Create a webserver object that listens for HTTP request on port 80
@@ -19,22 +21,19 @@ const char *password = "thereisnospoon";   // The password required to connect t
 const char *OTAName = "ESP8266";           // A name and a password for the OTA service
 const char *OTAPassword = "esp8266";
 
-// String page = "";
-// int TRIG = D0;
-// int ECHO = D1;
-// int GPIO_0 = D2;
-// int GPIO_1 = D7;
 
 #define TRIG D0
 #define ECHO D1
 #define GPIO_0 D2
 #define GPIO_1 D7
 
+#define GPIO_TEST D3
+
 bool GPIO_0_status = false;
 bool GPIO_1_status = false;
-bool water_sensor_status = false;
+
 double water_container_0_level = 0;
-double water_container_1_level = 0;
+
 
 long hp = 0; //sorry for the messy global
 
@@ -87,9 +86,7 @@ const char* mdnsName = "esp8266"; // Domain name for the mDNS responder
 void setup() {
   sonic_sensor_setup();
 
-  // pinMode(LED_RED, OUTPUT);    // the pins with LEDs connected are outputs
-  // pinMode(LED_GREEN, OUTPUT);
-  // pinMode(LED_BLUE, OUTPUT);
+
 
   Serial.begin(115200);        // Start the Serial communication to send messages to the computer
   delay(10);
@@ -111,11 +108,7 @@ void setup() {
 }
 
 
-
-bool rainbow = false;             // The rainbow effect is turned off on startup
-
 unsigned long prevMillis = millis();
-int hue = 0;
 
 void loop() {
   sonic_sensor_loop();
@@ -160,9 +153,9 @@ void startOTA() { // Start the OTA service
 
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
-    // digitalWrite(LED_RED, 0);    // turn off the LEDs
-    // digitalWrite(LED_GREEN, 0);
-    // digitalWrite(LED_BLUE, 0);
+
+    //TO-DO: turn off all GPIO and sensors! ex. digitalWrite(ourpins, LOW);
+
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\r\nEnd");
@@ -287,6 +280,23 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     case WStype_TEXT:                     // if new text data is received
       Serial.printf("[%u] get Text: %s\n", num, payload);
 
+      if (payload[0] == 'x'){
+
+        Serial.begin(115200);
+        pinMode(GPIO_TEST, OUTPUT);
+        digitalWrite(GPIO_TEST,HIGH);
+
+      }
+
+      if (payload[0] == 'y'){
+
+        Serial.begin(115200);
+        pinMode(GPIO_TEST, OUTPUT);
+        digitalWrite(GPIO_TEST,LOW);
+
+      }
+
+
       if (payload[0] == 'defineWaterLevel') {
       }
 
@@ -295,29 +305,37 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
       if (payload[0] == 'toggleGPIO_0_off') {
       
-        bool gpio0status = false;
-        digitalWrite(GPIO_0, LOW);
+        Serial.begin(115200);
+        pinMode(GPIO_0, OUTPUT);
+        digitalWrite(GPIO_0,LOW);
+        
         
       }
 
       if (payload[0] == 'toggleGPIO_0_on') {
       
-        bool gpio0status = true;.
-        digitalWrite(GPIO_0, HIGH);
+        Serial.begin(115200);
+        pinMode(GPIO_0, OUTPUT);
+        digitalWrite(GPIO_0,HIGH);
+        
 
       }
 
       if (payload[0] == 'toggleGPIO_1_off') {
       
-        bool gpio1status = false;
-        digitalWrite(GPIO_1, LOW);
+        
+        Serial.begin(115200);
+        pinMode(GPIO_1, OUTPUT);
+        digitalWrite(GPIO_1,LOW);
 
       }
 
       if (payload[0] == 'toggleGPIO_1_on') {
       
-        bool gpio1status = true;
-        digitalWrite(GPIO_1, HIGH);
+        Serial.begin(115200);
+        pinMode(GPIO_1, OUTPUT);
+        digitalWrite(GPIO_1,HIGH);
+        
 
       }
 
