@@ -33,5 +33,8 @@ WebStorm IDE or a browser's console first!*
 Try to get ethernet access. It's really convenient to connect to the Internet with ethernet and to the ESP with Wifi, so you don't have to 
 bridge to wifi connections.
 
+TO-DO:
+Implement JSON. https://arduinojson.org/v5/example/
+
 BUGS:
 mDNS is broken. Can we get a like, subscribe, and bug fix?
