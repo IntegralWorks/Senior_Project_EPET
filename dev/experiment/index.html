@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Control panel</title>
+</head>
+<body>
+
+  <script>
+  <![CDATA[
+  var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
+  connection.onopen = function () {
+  connection.send('Connect ' + new Date());
+  };
+
+  connection.onerror = function (error) {
+  console.log('WebSocket Error ', error);
+  };
+  connection.onmessage = function (e) {
+  console.log('Server: ', e.data);
+  };
+  connection.onclose = function () {
+  console.log('WebSocket connection closed');
+  };
+
+  ws.onopen = function(event) {
+    window.alert("data flow active");
+    documen.getElementById("data").innerHTML
+
+};
+  ]]>
+  </script>
+  <h3>Define water tanks</h3>
+  <p></p>Radius (in cm): <input type="number" id="radius_1" step="any" min=".001" max="4294967295" />
+  <p></p>Height (in cm): <input type="number" id="height_1" step="any" min=".001" max="4294967295" /> <button onclick="setVolume_tank1()">Set water tank 1's parameters.</button>
+  <p>Volume:</p>
+  <p id="volume_1"></p><br />
+  <script>
+
+  <![CDATA[
+
+
+    var trigger = 'A'; //signals arduino to only read data for tank A
+    console.log('Data stream exclusively for tank 1. ' + trigger);
+    connection.send(triger);
+
+    function setVolume_tank1() {
+        var radius_1 = document.getElementById("radius_1").value;
+        var height_1 = document.getElementById("height_1").value;
+        var volume_1 = pi*r*r*h;
+
+        const pi = 3.14;
+
+        setTimeout(() => {
+            console.log('senden height_1.');
+            connection.send(height_1);
+        },250);
+
+        volume_1 = pi*r*r*h;
+
+        document.getElementById("radius_1").innerHTML = radius_1;
+        document.getElementById("height_1").innerHTML = height_1;
+        document.getElementById("volume_1").innerHTML = volume_1;
+
+    }
+  ]]>
+  </script>
+  <p></p>Radius (in cm): <input type="number" id="radius_2" step="any" min=".001" max="4294967295" />
+  <p></p>Height (in cm): <input type="number" id="height_2" step="any" min=".001" max="4294967295" /> <button onclick="sentVolume_tank2()">Set water tank 2's parameters.</button>
+  <p>Volume:</p>
+  <p id="volume"></p><br />
+  <script>
+
+  <![CDATA[
+
+    function setVolume_tank2() {
+        var radius_2 = document.getElementById("radius_2").value;
+        var height_2 = document.getElementById("height_2").value;
+        var volume_2 = pi*r*r*h;
+
+        const pi = 3.14;
+
+        setTimeout(() => {
+            console.log('senden height_2.');
+            connection.send(height_2);
+        },250);
+
+        volume = pi*r*r*h;
+
+        document.getElementById("radius_2").innerHTML = radius_2;
+        document.getElementById("height_2").innerHTML = height_2;
+        document.getElementById("volume_2").innerHTML = volume_2;
+
+    }
+  ]]>
+  </script>
+  <p>eazyCONSOLE.<br />
+  Type commands in the eazyConsole or press the GPIO buttons. eazyConsole: <input id="eazyConsoleInput" /><br /></p><button onclick="eazyConsole()">Enter Command</button>
+  <p>eazyConsole history:</p>
+  <p id="eazyConsole"></p>
+  <script>
+  <![CDATA[
+
+    var consoleHistory = [];
+    var currentCommand = document.getElementById("eazyConsoleInput").value;
+
+    document.getElementById("eazyConsole").innerHTML = currentCommand;
+    function eazyConsole() {
+        var consoleCommands = ["defineWaterLevel","getWaterLevel","toggleGPIO_0_on","toggleGPIO_0_off","toggleGPIO_1_on","toggleGPIO_1_off"];
+        // var consoleHistory = [];
+        //
+        var currentCommand = document.getElementById("eazyConsoleInput").value;
+        if (consoleCommands.includes(currentCommand)) {
+            switch (currentCommand) {
+                case consoleCommands[0]:
+                    //code for defining water level
+                    break;
+                case consoleCommands[1]:
+                    //code for retrieving water level
+                    break;
+                case consoleCommands[2]:
+                    GPIO_0_ON();
+                    //send string to Arduino!
+                    break;
+                case consoleCommands[3]:
+                    GPIO_0_OFF();
+                    break;
+                case consoleCommands[4]:
+                    GPIO_1_ON();
+                    break;
+                case consoleCommands[5]:
+                    GPIO_1_OFF();
+                    break;
+            }
+        } else {
+            document.getElementById("eazyConsole").innerHTML = "not a command friendo!";
+        }
+    }
+
+
+
+
+
+  ]]>
+  </script>
+  <p>Commands:<br />
+  defineWaterLevel<br />
+  getWaterLevel<br />
+  toggleGPIO_0_on<br />
+  toggleGPIO_0_off<br />
+  toggleGPIO_1_on<br />
+  toggleGPIO_1_off<br />
+  getGPIOStatus<br /></p><button onclick="GPIO_0_ON()">GPIO_0_ON</button> <button onclick="GPIO_0_OFF()">GPIO_0_OFF</button> <button onclick="GPIO_1_ON()">GPIO_1_ON</button> <button onclick="GPIO_1_OFF()">GPIO_1_OFF</button><br />
+  <p>GPIO_0_STATUS:</p>
+  <p id="gpio0Status"></p><br />
+  <p>GPIO_1_STATUS:</p>
+  <p id="gpio1Status"></p>
+  <script>
+  <![CDATA[
+    
+    function GPIO_0_ON() {
+
+    document.getElementById("gpio0Status").innerHTML = "GPIO 0 is ON";
+    var gpstatus0 = 'toggleGPIO_0_on';
+    console.log('GPIO_0 off: ');
+    connection.send(test);
+        
+    }
+
+    function GPIO_0_OFF() {
+
+    document.getElementById("gpio0Status").innerHTML = "GPIO 0 is OFF";
+    var gpstatus0 = 'toggleGPIO_0_off';
+    console.log('GPIO_0 off: ');
+    connection.send(test);
+        
+    }
+
+    function GPIO_1_ON() {
+
+    document.getElementById("gpio1Status").innerHTML = "GPIO 1 is ON";
+    var gpstatus1 = 'toggleGPIO_1_on';
+    console.log('GPIO_1 on: ');
+    connection.send(test);
+        
+    }
+
+    function GPIO_1_OFF() {
+
+    document.getElementById("gpio1Status").innerHTML = "GPIO 1 is OFF";
+    var gpstatus1 = 'toggleGPIO_1_off';
+    console.log('GPIO_1 off: ');
+    connection.send(test);
+        
+    }
+
+  ]]>
+  </script>
+  <h3>Dynamic GPIO</h3>
+  <script>
+  <![CDATA[
+
+    function gpioTestON(){
+    var test = 'x';
+    console.log('TESTING GPIO, x IS ON!!: ' + test);
+    connection.send(test);
+  }
+
+    function gpioTestOFF(){
+    var test = 'y';
+    console.log('TESTING GPIO, y IS OFF!!: ' + test);
+    connection.send(test);
+
+  }
+
+  ]]>
+  </script> <button onclick="gpioTestON()">TEST ON!!!</button> <button onclick="gpioTestOFF()">TEST OFF!!!</button>
+</body>
+</html>
