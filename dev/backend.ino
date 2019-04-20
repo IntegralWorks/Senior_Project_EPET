@@ -5,13 +5,18 @@
 #include <ESP8266mDNS.h>
 #include <FS.h>
 #include <WebSocketsServer.h>
+#include <WebSocketsClient.h>
+#include <Hash.h>
 
 //https://github.com/esp8266/arduino-esp8266fs-plugin/releases java thingy
 
+//https://www.hackster.io/brzi/nodemcu-websockets-tutorial-3a2013 documentation for sending data to front end
+
 ESP8266WiFiMulti wifiMulti;       // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
+// ESP8266WiFiMulti WiFiMulti;
 
 ESP8266WebServer server(80);       // Create a webserver object that listens for HTTP request on port 80
-WebSocketsServer webSocket(81);    // create a websocket server on port 81
+WebSocketsServer webSocket(81);    // create a websocket server on port 81 for GPIO services
 
 File fsUploadFile;                 // a File variable to temporarily store the received file
 
@@ -29,6 +34,11 @@ const char *OTAPassword = "esp8266";
 
 #define GPIO_TEST D3
 
+#define USE_SERIAL Serial1
+
+
+
+
 bool GPIO_0_status = false;
 bool GPIO_1_status = false;
 
@@ -36,6 +46,8 @@ double water_container_0_level = 0;
 
 
 long hp = 0; //sorry for the messy global
+
+
 
 
 void sonic_sensor_setup(){
@@ -85,8 +97,6 @@ const char* mdnsName = "esp8266"; // Domain name for the mDNS responder
 
 void setup() {
   sonic_sensor_setup();
-
-
 
   Serial.begin(115200);        // Start the Serial communication to send messages to the computer
   delay(10);
@@ -277,70 +287,98 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
       }
       break;
-    case WStype_TEXT:                     // if new text data is received
+     case WStype_TEXT:                     // if new text data is received
       Serial.printf("[%u] get Text: %s\n", num, payload);
 
-      if (payload[0] == 'x'){
+      if (Serial.available() > 0){
+        char c[] = {(char)Serial.read()};
+        webSocket.broadcastTXT(c,sizeof(c));
+        
+      }
 
+      if (payload[0] == 'M'){
+
+        char a[] = {('N')};
+//        char d[] = {(char)Serial.read()};
+//        webSocket.broadcastTXT(d,sizeof(d));
+        webSocket.broadcastTXT(a,sizeof(a));
+      }
+
+      if (payload[0] == 'O'){
+        char dummyVar = (char) hp;
+        char q[] = {(dummyVar)};
+
+        long dummNum = 21; 
+
+        
+        //char q[] = {(char)Serial.read()};
+        webSocket.broadcastTXT(q,sizeof(q));
+        
+      }
+
+      //above: water tank services
+//🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉
+      //below: GPIO services
+      if (payload[0] == 'X'){
         Serial.begin(115200);
         pinMode(GPIO_TEST, OUTPUT);
         digitalWrite(GPIO_TEST,HIGH);
-
       }
-
-      if (payload[0] == 'y'){
-
+      if (payload[0] == 'x'){
         Serial.begin(115200);
         pinMode(GPIO_TEST, OUTPUT);
         digitalWrite(GPIO_TEST,LOW);
-
       }
 
-
-      if (payload[0] == 'defineWaterLevel') {
-      }
-
-      if (payload[0] == 'getWaterLevel') {
-      }
-
-      if (payload[0] == 'toggleGPIO_0_off') {
-      
+      if (payload[0] == 'a') {//note: these strings are just algorithimic.
+        //the console commands themselves can contain numbers but the corresponding
+        //char or string here can't. no worries though.
+        
         Serial.begin(115200);
         pinMode(GPIO_0, OUTPUT);
-        digitalWrite(GPIO_0,LOW);
-        
-        
+        digitalWrite(GPIO_0,LOW);        
       }
 
-      if (payload[0] == 'toggleGPIO_0_on') {
-      
+      if (payload[0] == 'A') {//note: these strings are just algorithimic.
+        //the console commands themselves can contain numbers but the corresponding
+        //char or string here can't. no worries though.
+        
         Serial.begin(115200);
         pinMode(GPIO_0, OUTPUT);
         digitalWrite(GPIO_0,HIGH);
-        
-
       }
 
-      if (payload[0] == 'toggleGPIO_1_off') {
-      
+      if (payload[0] == 'b') {//note: these strings are just algorithimic.
+        //the console commands themselves can contain numbers but the corresponding
+        //char or string here can't. no worries though.
         
         Serial.begin(115200);
         pinMode(GPIO_1, OUTPUT);
         digitalWrite(GPIO_1,LOW);
-
       }
 
-      if (payload[0] == 'toggleGPIO_1_on') {
-      
+      if (payload[0] == 'B') {//note: these strings are just algorithimic.
+        //the console commands themselves can contain numbers but the corresponding
+        //char or string here can't. no worries though.
+        
         Serial.begin(115200);
         pinMode(GPIO_1, OUTPUT);
         digitalWrite(GPIO_1,HIGH);
-        
-
       }
 
-      break;
+      if (isDigit(payload[0]) == true){ //need to test: this only works with numbers right? (:
+        Serial.begin(115200);
+
+        fetchVolumeData(payload[0]);
+      }
+        
+        break;
   }
+}
+
+float fetchVolumeData(uint8_t arg){
+  float volume = arg;
+  return volume;
 }
 
 String formatBytes(size_t bytes) { // convert sizes in bytes to KB and MB
