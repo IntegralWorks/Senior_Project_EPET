@@ -1,74 +1,199 @@
 <!DOCTYPE html>
+<meta charset="utf-8"/>
 <html>
+
+<style>
+
+input[type="text"]{
+  width: 90%;
+  height: 3vh;
+}
+
+input[type="button"]{
+  width: 9%;
+  height: 3.6vh;
+}
+
+.rxd{
+  height: 90vh;
+}
+
+textarea {
+  width: 99%;
+  height: 100%;
+  resize: none;
+}
+
+
+</style>
+
+<head>
+    <title>Control panel</title>
+</head>
 <body>
 
 <script>
-var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
-connection.onopen = function () {
-  connection.send('Connect ' + new Date());
-};
 
-connection.onerror = function (error) {
-  console.log('WebSocket Error ', error);
-};
-connection.onmessage = function (e) {
-  console.log('Server: ', e.data);
-};
-connection.onclose = function () {
-  console.log('WebSocket connection closed');
-};
-</script>
+    var connection = new WebSocket('ws://' + window.location.hostname + ':81/');
+    connection.onopen = function () {
+        connection.send('Connect ' + new Date());
+    };
 
-<h3>GPIO TEST!!!!!</h3>
-<script>
+    connection.onerror = function (error) {
+        console.log('WebSocket Error ', error);
+    };
+    connection.onmessage = function (e) {
+        console.log('Server: ', e.data);
+    };
+    connection.onclose = function () {
+        console.log('WebSocket connection closed');
+    };
 
-    function gpioTestON(){
-    var test = 'x';
-    console.log('TESTING GPIO, x IS ON!!: ' + test);
-    connection.send(test);
-}
-
-    function gpioTestOFF(){
-    var test = 'y';
-    console.log('TESTING GPIO, y IS OFF!!: ' + test);
-    connection.send(test);
-
-}
 
 </script>
 
-<button onclick="gpioTestON()">TEST ON!!!</button>
-<button onclick="gpioTestOFF()">TEST OFF!!!</button>
-
-
-<h3>DEFINE WATER LEVEL</h3>
-<p></p>
-Radius (in cm): <input type="number" id=radius step="any" min=".001" max="4294967295">
-<p></p>
-Height (in cm): <input type="number" id=height step="any" min=".001" max="4294967295">
-<button onclick="calculateVolume()">calculate volume</button>
-<p>Volume:</p> <p id="volStatus"></p>
-<br/>
 <script>
-    function calculateVolume() {
-        var r = document.getElementById("radius").value;
-        var h = document.getElementById("height").value;
+// var Socket;
+function start() {
+  //Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+  
+  connection.onmessage = function(evt) {
+    document.getElementById("rxConsole").value += evt.data;
+  }
+  
+}
+
+function enterpressed() {
+ Socket.send(document.getElementById("txbuff").value);
+ document.getElementById("txbuff").value = "";
+}
+</script>
+
+<body onload="javascript:start();">
+<div>       
+        <input class="txd" type="text" id="txbuff" onkeydown="if(event.keyCode == 13) enterpressed();">
+        <input class="txd" type="button" onclick="enterpressed();" value="Send" >
+  </div>
+  <br>
+  <div class="rxd">
+    <textarea id="rxConsole" readonly></textarea>
+  </div>
+
+<p>Test Message:</p>
+<button onclick="testMessage()">Gives me conniptions...</button>
+<p id="message"></p><br />
+
+<script>
+    function testMessage() {
+        console.log('Sending test message');
+        var message = "M";
+        connection.send(message);
+    }
+
+    //     var event = connection.onmessage('N');
+    //     connection.addEventListener('open', (event) => {
+    //         console.print('Message from arduino recieved');
+    //     });
+
+    //     document.getElementById("message").innerHTML = event;
+    // }
+
+</script>
+
+<p>Retrieve Water level:</p>
+<button onclick="retrieveWaterLevel()">You're finished!</button>
+<p id="message2"></p><br />
+
+<script>
+    function retrieveWaterLevel() {
+        console.log('aimen high, shooten true...');
+        var message = "O";
+        connection.send(message);
+    }
+
+    //     var event = connection.onmessage('N');
+    //     connection.addEventListener('open', (event) => {
+    //         console.print('Message from arduino recieved');
+    //     });
+
+    //     document.getElementById("message").innerHTML = event;
+    // }
+
+</script>
+
+
+<h3>Define water tanks</h3>
+<p></p>Radius (in cm): <input type="number" id="radius_1" step="any" min=".001" max="4294967295" />
+<p></p>Height (in cm): <input type="number" id="height_1" step="any" min=".001" max="4294967295" />
+<button onclick="setVolume_tank1()">Set water tank 1's parameters.</button>
+<p>Volume:</p>
+<p id="volume_1"></p><br />
+
+
+<script>
+    function setVolume_tank1() {
+
+        // var trigger = 'A'; //signals arduino to only read data for tank A
+        // console.log('Data stream exclusively for tank 1. ' + trigger);
+        // connection.send(trigger);
+
+        var radius_1 = document.getElementById("radius_1").value;
+        var height_1 = document.getElementById("height_1").value;
 
         const pi = 3.14;
 
-        document.getElementById("volStatus").innerHTML = pi*r*r*h;
+        // setTimeout(() => {
+        //     console.log('senden height_1.');
+        //     connection.send(height_1);
+        // },250);
+
+        var volume_1 = pi*radius_1*height_1*height_1;
+
+        document.getElementById("radius_1").innerHTML = radius_1;
+        document.getElementById("height_1").innerHTML = height_1;
+        document.getElementById("volume_1").innerHTML = volume_1;
+
     }
+
+</script>
+<p></p>Radius (in cm): <input type="number" id="radius_2" step="any" min=".001" max="4294967295" />
+<p></p>Height (in cm): <input type="number" id="height_2" step="any" min=".001" max="4294967295" />
+<button onclick="setVolume_tank2()">Set water tank 2's parameters.</button>
+<p>Volume:</p>
+<p id="volume_2"></p><br />
+<script>
+    function setVolume_tank2() {
+
+        // var trigger = 'B'; //signals arduino to only read data for tank B
+        // console.log('Data stream exclusively for tank 1. ' + trigger);
+        // connection.send(trigger);
+
+        var radius_2 = document.getElementById("radius_2").value;
+        var height_2 = document.getElementById("height_2").value;
+
+        const pi = 3.14;
+
+        // setTimeout(() => {
+        //     console.log('senden height_2.');
+        //     connection.send(height_2);
+        // },250);
+
+        var volume_2 = pi*radius_2*height_2*height_2;
+
+        document.getElementById("radius_2").innerHTML = radius_2;
+        document.getElementById("height_2").innerHTML = height_2;
+        document.getElementById("volume_2").innerHTML = volume_2;
+
+    }
+
 </script>
 
-<p>eazyCONSOLE.<br/>
-    Type commands in the eazyConsole or press the GPIO buttons.
-    eazyConsole: <input id=eazyConsoleInput>
-    </br>
-</p>
-
-<button onclick="eazyConsole()">Enter Command</button>
-<p>eazyConsole history:</p> <p id="eazyConsole"></p>
+<p>eazyCONSOLE.<br />
+    Type commands in the eazyConsole or press the GPIO buttons. eazyConsole: <input id="eazyConsoleInput" /><br /></p><button onclick="eazyConsole()">Enter Command</button>
+<p>eazyConsole history:</p>
+<p id="eazyConsole"></p>
 <script>
+
 
     var consoleHistory = [];
     var currentCommand = document.getElementById("eazyConsoleInput").value;
@@ -110,71 +235,79 @@ Height (in cm): <input type="number" id=height step="any" min=".001" max="429496
 
 
 
+
 </script>
-
-<p>
-
-    Commands: <br/>
-    defineWaterLevel <br/>
-    getWaterLevel <br/>
-    toggleGPIO_0_on <br/>
-    toggleGPIO_0_off <br/>
-    toggleGPIO_1_on <br/>
-    toggleGPIO_1_off <br/>
-    getGPIOStatus <br/>
-</p>
-
-
-
-<button onclick="GPIO_0_ON()">GPIO_0_ON</button>
-<button onclick="GPIO_0_OFF()">GPIO_0_OFF</button>
-<button onclick="GPIO_1_ON()">GPIO_1_ON</button>
-<button onclick="GPIO_1_OFF()">GPIO_1_OFF</button>
-<br/>
-
-<p>GPIO_0_STATUS:</p> <p id="gpio0Status"></p>
-<br/>
-<p>GPIO_1_STATUS:</p> <p id="gpio1Status"></p>
-
+<p>Commands:<br />
+    defineWaterLevel<br />
+    getWaterLevel<br />
+    toggleGPIO_0_on<br />
+    toggleGPIO_0_off<br />
+    toggleGPIO_1_on<br />
+    toggleGPIO_1_off<br />
+    getGPIOStatus<br /></p><button onclick="GPIO_0_ON()">GPIO_0_ON</button> <button onclick="GPIO_0_OFF()">GPIO_0_OFF</button> <button onclick="GPIO_1_ON()">GPIO_1_ON</button> <button onclick="GPIO_1_OFF()">GPIO_1_OFF</button><br />
+<p>GPIO_0_STATUS:</p>
+<p id="gpio0Status"></p><br />
+<p>GPIO_1_STATUS:</p>
+<p id="gpio1Status"></p>
 <script>
-    
+
+
     function GPIO_0_ON() {
 
-    document.getElementById("gpio0Status").innerHTML = "GPIO 0 is ON";
-    var gpstatus0 = 'toggleGPIO_0_on';
-    console.log('GPIO_0 off: ');
-    connection.send(test);
-        
+        document.getElementById("gpio0Status").innerHTML = "GPIO 0 is ON";
+        var gpiostatus0 = 'A';
+        console.log('GPIO_0 off: ');
+        connection.send(gpiostatus0);
+
     }
 
     function GPIO_0_OFF() {
 
-    document.getElementById("gpio0Status").innerHTML = "GPIO 0 is OFF";
-    var gpstatus0 = 'toggleGPIO_0_off';
-    console.log('GPIO_0 off: ');
-    connection.send(test);
-        
+        document.getElementById("gpio0Status").innerHTML = "GPIO 0 is OFF";
+        var gpiostatus0 = 'a';
+        console.log('GPIO_0 off: ');
+        connection.send(gpiostatus0);
+
     }
 
     function GPIO_1_ON() {
 
-    document.getElementById("gpio1Status").innerHTML = "GPIO 1 is ON";
-    var gpstatus1 = 'toggleGPIO_1_on';
-    console.log('GPIO_1 on: ');
-    connection.send(test);
-        
+        document.getElementById("gpio1Status").innerHTML = "GPIO 1 is ON";
+        var gpiostatus1 = 'B';
+        console.log('GPIO_1 on: ');
+        connection.send(gpiostatus1);
+
     }
 
     function GPIO_1_OFF() {
 
-    document.getElementById("gpio1Status").innerHTML = "GPIO 1 is OFF";
-    var gpstatus1 = 'toggleGPIO_1_off';
-    console.log('GPIO_1 off: ');
-    connection.send(test);
-        
+        document.getElementById("gpio1Status").innerHTML = "GPIO 1 is OFF";
+        var gpiostatus1 = 'b';
+        console.log('GPIO_1 off: ');
+        connection.send(gpiostatus1);
+
     }
 
-</script>
 
+</script>
+<h3>Dynamic GPIO</h3>
+<script>
+
+
+    function gpioTestON(){
+        var test = 'X';
+        console.log('TESTING GPIO, x IS ON!!: ' + test);
+        connection.send(test);
+    }
+
+    function gpioTestOFF(){
+        var test = 'x';
+        console.log('TESTING GPIO, y IS OFF!!: ' + test);
+        connection.send(test);
+
+    }
+
+
+</script> <button onclick="gpioTestON()">TEST ON!!!</button> <button onclick="gpioTestOFF()">TEST OFF!!!</button>
 </body>
 </html>
