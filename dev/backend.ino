@@ -27,46 +27,48 @@ const char *OTAName = "ESP8266";           // A name and a password for the OTA 
 const char *OTAPassword = "esp8266";
 
 
-#define TRIG D0
-#define ECHO D1
-#define GPIO_0 D2
+#define TRIG D1 
+#define ECHO D2
+#define GPIO_0 D0 //solenoid
 #define GPIO_1 D7
 
 #define GPIO_TEST D3
 
 #define USE_SERIAL Serial1
 
+long waterLevel0 = 0; //water level0
+long waterLevel1 = 0; //water level1
 
+long tankHeight0 = 50; //tank0 height
+long tankHeight1 = 52; //tank1 height
 
-
-bool GPIO_0_status = false;
-bool GPIO_1_status = false;
-
-double water_container_0_level = 0;
-
-
-long hp = 0; //sorry for the messy global
-
-
-
-
-void sonic_sensor_setup(){
+void sonic_sensor0_setup(){
   Serial.begin(115200);
   pinMode(TRIG, OUTPUT);
   pinMode(ECHO, INPUT);
 
-  Serial.print(hp);
+  Serial.print(waterLevel0);
   Serial.print("\n");
   delay(1000);
   
 }
 
-int sonic_sensor_loop(){
+// void sonic_sensor1_setup(){
+//   Serial.begin(115200);
+//   pinMode(TRIG, OUTPUT);
+//   pinMode(ECHO, INPUT);
+
+//   Serial.print(hp);
+//   Serial.print("\n");
+//   delay(1000);
+  
+// }
+
+int sonic_sensor0_loop(){
       
 // Sending to computer
 //  Serial.print("Current water level is: ");
   long t = 0, h = 0;
-  //hp = 0;
 
   
   // Transmitting pulse
@@ -83,20 +85,51 @@ int sonic_sensor_loop(){
   h = t / 58;
  
   h = h - 6;  // offset correction
-  h = 50 - h;  // water height, 0 - 50 cm
+  h = tankHeight0 - h;  // water height, 0 - 50 cm
   
-  hp = 2 * h;  // distance in %, 0-100 %
-  return hp;
+  waterLevel0 = 2 * h;  // distance in %, 0-100 %
+  return waterLevel0;
   // Serial.print(" cm\n");
   // Serial.print("\n");
   
   delay(1000);
 }
 
+// int sonic_sensor1_loop(){
+      
+// // Sending to computer
+// //  Serial.print("Current water level is: ");
+//   long t = 0, h = 0;
+
+  
+//   // Transmitting pulse
+//   digitalWrite(TRIG, LOW);
+//   delayMicroseconds(2);
+//   digitalWrite(TRIG, HIGH);
+//   delayMicroseconds(10);
+//   digitalWrite(TRIG, LOW);
+  
+//   // Waiting for pulse
+//   t = pulseIn(ECHO, HIGH);
+  
+//   // Calculating distance 
+//   h = t / 58;
+ 
+//   h = h - 6;  // offset correction
+//   h = tankHeight1 - h;  // water height, 0 - 50 cm
+  
+//   waterLevel1 = 2 * h;  // distance in %, 0-100 %
+//   return waterLevel1;
+//   // Serial.print(" cm\n");
+//   // Serial.print("\n");
+  
+//   delay(1000);
+// }
+
 const char* mdnsName = "esp8266"; // Domain name for the mDNS responder
 
 void setup() {
-  sonic_sensor_setup();
+  sonic_sensor0_setup();
 
   Serial.begin(115200);        // Start the Serial communication to send messages to the computer
   delay(10);
@@ -121,7 +154,7 @@ void setup() {
 unsigned long prevMillis = millis();
 
 void loop() {
-  sonic_sensor_loop();
+  sonic_sensor0_loop();
   webSocket.loop();                           // constantly check for websocket events
   server.handleClient();                      // run the server
   ArduinoOTA.handle();                        // listen for OTA events
@@ -277,6 +310,14 @@ void handleFileUpload(){ // upload a new file to the SPIFFS
   }
 }
 
+
+
+String commands [] = {"setTankHeight0", "setTankHeight1","toggleGPIOon","toggleGPIOoff","toggleGPIO_l_on","toggleGPIO_l_off"};
+int tanks [] = {0,1};
+int tmp = 0;
+bool flip = false;
+
+//https://stackoverflow.com/questions/14769917/when-to-use-unsigned-char-pointer
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) { // When a WebSocket message is received
   switch (type) {
     case WStype_DISCONNECTED:             // if the websocket is disconnected
@@ -287,90 +328,117 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
       }
       break;
+      
+//    case WStype_BIN:
+//      {Serial.printf("[%u] get binary: %s\n", num, payload);
+//      hexdump(payload,length);
+//      }
+//     
+//     break;
      case WStype_TEXT:                     // if new text data is received
       Serial.printf("[%u] get Text: %s\n", num, payload);
 
-      if (Serial.available() > 0){
-        char c[] = {(char)Serial.read()};
-        webSocket.broadcastTXT(c,sizeof(c));
+      if (isDigit(payload[0])){
+
+        
+        Serial.print("Integer detected.\n ");
+
+        unsigned char* magicChunk = payload;
+
+        const char* magicChar_asterisk(reinterpret_cast<const char*>(magicChunk)); //https://stackoverflow.com/questions/17746688/convert-unsigned-char-to-string
+
+        int targetNumber = atoi(magicChar_asterisk);
+        tmp = targetNumber;
+        Serial.print(targetNumber);
+        Serial.print("\n");
+        Serial.print(tmp + 1);
+        Serial.print("\n");
+        Serial.print("water level: ");
+        Serial.print(waterLevel0);
+        Serial.print("\n");
+        Serial.print(tankHeight0);
+        Serial.print("\n");
+        Serial.print(tankHeight1);
+
+        char buffer[7];
+        webSocket.broadcastTXT(itoa(waterLevel0,buffer,10));
+
+//       String my_string = String(waterLevel0);
+//       webSocket.broadcastTXT(my_string,sizeof(my_string));
+        
         
       }
 
-      if (payload[0] == 'M'){
+      else {
 
-        char a[] = {('N')};
-//        char d[] = {(char)Serial.read()};
-//        webSocket.broadcastTXT(d,sizeof(d));
-        webSocket.broadcastTXT(a,sizeof(a));
-      }
+        Serial.print("String detected.\n ");
 
-      if (payload[0] == 'O'){
-        char dummyVar = (char) hp;
-        char q[] = {(dummyVar)};
+        unsigned char* magicChunk = payload;
 
-        long dummNum = 21; 
+        //const char* magicChar_asterisk(reinterpret_cast<const char*>(magicChunk)); //https://stackoverflow.com/questions/17746688/convert-unsigned-char-to-string
+
+        String magicString(reinterpret_cast<char*>(magicChunk)); https://stackoverflow.com/questions/17746688/convert-unsigned-char-to-string
+        
+        //Serial.print(magicChar_asterisk);
+        
+        Serial.print(magicString);
+
+        Serial.print("\n");
+        Serial.print("water level: ");
+        Serial.print(waterLevel0);
+        Serial.print("\n");
+        Serial.print(tankHeight0);
+        Serial.print("\n");
+        Serial.print(tankHeight1);
 
         
-        //char q[] = {(char)Serial.read()};
-        webSocket.broadcastTXT(q,sizeof(q));
-        
-      }
 
-      //above: water tank services
-//🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉🐉
-      //below: GPIO services
-      if (payload[0] == 'X'){
-        Serial.begin(115200);
-        pinMode(GPIO_TEST, OUTPUT);
-        digitalWrite(GPIO_TEST,HIGH);
-      }
-      if (payload[0] == 'x'){
-        Serial.begin(115200);
-        pinMode(GPIO_TEST, OUTPUT);
-        digitalWrite(GPIO_TEST,LOW);
-      }
+    if (magicString == commands[0])
+    {
+      tankHeight0 = tmp;
+    }
 
-      if (payload[0] == 'a') {//note: these strings are just algorithimic.
-        //the console commands themselves can contain numbers but the corresponding
-        //char or string here can't. no worries though.
-        
-        Serial.begin(115200);
-        pinMode(GPIO_0, OUTPUT);
-        digitalWrite(GPIO_0,LOW);        
-      }
+    if (magicString == commands[1])
+    {
+      tankHeight1 = tmp;
+    }
 
-      if (payload[0] == 'A') {//note: these strings are just algorithimic.
-        //the console commands themselves can contain numbers but the corresponding
-        //char or string here can't. no worries though.
-        
-        Serial.begin(115200);
-        pinMode(GPIO_0, OUTPUT);
-        digitalWrite(GPIO_0,HIGH);
-      }
+    if (magicString == commands[2])
+    {
+      Serial.begin(115200);
+      pinMode(GPIO_0, OUTPUT);
+      digitalWrite(GPIO_0,HIGH);
+    }
 
-      if (payload[0] == 'b') {//note: these strings are just algorithimic.
-        //the console commands themselves can contain numbers but the corresponding
-        //char or string here can't. no worries though.
-        
-        Serial.begin(115200);
-        pinMode(GPIO_1, OUTPUT);
-        digitalWrite(GPIO_1,LOW);
-      }
+    if (magicString == commands[3])
+    {
+       Serial.begin(115200);
+            pinMode(GPIO_0, OUTPUT);
+            digitalWrite(GPIO_0,LOW);  
+    }
 
-      if (payload[0] == 'B') {//note: these strings are just algorithimic.
-        //the console commands themselves can contain numbers but the corresponding
-        //char or string here can't. no worries though.
-        
-        Serial.begin(115200);
-        pinMode(GPIO_1, OUTPUT);
-        digitalWrite(GPIO_1,HIGH);
-      }
+    if (magicString == commands[4])
+    {
+      Serial.begin(115200);
+            pinMode(GPIO_1, OUTPUT);
+            digitalWrite(GPIO_1,HIGH);
+    }
 
-      if (isDigit(payload[0]) == true){ //need to test: this only works with numbers right? (:
-        Serial.begin(115200);
+    if (magicString == commands[5])
+    {
+       Serial.begin(115200);
+            pinMode(GPIO_1, OUTPUT);
+            digitalWrite(GPIO_1,LOW);
+    }
 
-        fetchVolumeData(payload[0]);
-      }
+
+
+        }
+
+
+
+       
+      
         
         break;
   }
