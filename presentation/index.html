@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<html>
+
+<style>
+
+    input[type="text"]{
+        width: 90%;
+        height: 3vh;
+    }
+
+    input[type="button"]{
+        width: 9%;
+        height: 3.6vh;
+    }
+
+    .rxd{
+        height: 90vh;
+    }
+
+    textarea {
+        width: 99%;
+        height: 100%;
+        resize: none;
+    }
+
+
+</style>
+
+<head>
+    <title>Control panel</title>
+</head>
+<body>
+
+<body onload="javascript:start();">
+<div>
+    <input class="txd" type="text" id="txbuff" onkeydown="if(event.keyCode == 13) enterpressed();">
+    <input class="txd" type="button" onclick="enterpressed();" value="Send" >
+</div>
+<br>
+<div class="rxd">
+    <textarea id="rxConsole" readonly></textarea>
+</div>
+
+<p>Retrieve Water level:</p>
+<button onclick="retrieveWaterLevel()">Retrieve water level</button>
+<p id="waterLevel"></p><br />
+
+<h3>Set numeric data</h3>
+<p></p>: <input type="number" id="numericData" step="any" min=".001" max="4294967295" />
+<button onclick="sendNumeric()">Set number.</button>
+
+<h3>Set String data</h3>
+<p></p>: <input type="text" id="StringData"/>
+<button onclick="sendString()">Set string.</button>
+
+<!-- <h3>Send command with numeric, string data as arguments</h3>
+<button onclick="sendCommand()">Send command.</button>
+ -->
+
+<p>Commands:<br />
+
+    setTankHeight0 (num arg: height in cm)<br />
+    setTankHeight1 (num arg: height in cm)<br />
+    toggleGPIO_0_on (num arg: specifies tank 0 or 1)<br />
+    toggleGPIO_0_off (num arg: specifies tank 0 or 1)<br />
+    toggleGPIO_1_on (num arg: specifies tank 0 or 1)<br />
+    toggleGPIO_1_off (num arg: specifies tank 0 or 1)<br />
+
+
+<p>GPIO_0_STATUS:</p>
+<p id="gpio0Status"></p><br />
+<p>GPIO_1_STATUS:</p>
+<p id="gpio1Status"></p>
+
+
+
+<script>
+
+    var numData = document.getElementById("numericData").value;
+    var stringData = document.getElementById("StringData").value;
+
+    //critical globals for water height
+    var WaterLevels = [0,0];
+    var WaterHeight = [50,52];
+    var tankVolume = [0,0];
+
+    var connection = new WebSocket('ws://' + window.location.hostname + ':81/');
+    connection.onopen = function () {
+        connection.send('Connect ' + new Date());
+    };
+
+    connection.onerror = function (error) {
+        console.log('WebSocket Error ', error);
+    };
+    connection.onmessage = function (e) {
+        console.log('Server: ', e.data);
+    };
+    connection.onclose = function () {
+        console.log('WebSocket connection closed');
+    };
+    // var Socket;
+    function start() {
+        //Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+
+        connection.onmessage = function(evt) {
+            document.getElementById("rxConsole").value += evt.data;
+            document.getElementById("incomingData").value +=evt.data;
+        }
+
+    }
+
+    function enterpressed() {
+        Socket.send(document.getElementById("txbuff").value);
+        document.getElementById("txbuff").value = "";
+    }
+
+    function retrieveWaterLevel() {
+        console.log('retrieving water level...');
+        var message = "O";
+        connection.send(message);
+    }
+
+
+    function sendNumeric() {
+
+        var numData = document.getElementById("numericData").value;
+
+        console.log(parseInt(numData,10));
+        connection.send(parseInt(numData,10));
+
+
+        document.getElementById("numericData").innerHTML = numData;
+    }
+
+   function sendString() {
+
+        var stringData = document.getElementById("StringData").value;
+
+        console.log(stringData);
+        connection.send(stringData);
+
+
+        document.getElementById("StringData").innerHTML = stringData;
+    }
+    
+
+    // function sendCommand(){
+
+    //     connection.send(parseInt(numData,10)); //radix: 10
+    //     setTimeout(connection.send(stringData),10); //10 ms wait
+    // }
+
+</script>
